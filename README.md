@@ -1,4 +1,22 @@
-## Foundry
+# Decentralized Freelance Escrow — Solidity
+
+A production-pattern smart contract for trustless freelance payments on Ethereum.
+
+## Features
+- Deadline-based payment release
+- 5% penalty on client delay (cancelByFreelancer)
+- Dispute resolution with neutral arbiter
+- Auto-resolve if arbiter times out
+- Pull-payment fallback for failed transfers
+- 2-of-2 deadline extension approval
+
+## Tech Stack
+Solidity ^0.8.18 | Foundry | Sepolia Testnet
+
+## Security Patterns Applied
+- Checks-Effects-Interactions (CEI)
+- Reentrancy protection
+- Pull-payment fallback (FIX F)## Foundry
 
 **Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
 
