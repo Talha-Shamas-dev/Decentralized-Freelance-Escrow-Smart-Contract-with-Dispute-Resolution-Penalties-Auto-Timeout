@@ -1,84 +1,56 @@
-# Decentralized Freelance Escrow — Solidity
+# Decentralized Freelance Escrow
 
-A production-pattern smart contract for trustless freelance payments on Ethereum.
+[![Solidity](https://img.shields.io/badge/Solidity-^0.8.18-blue)](https://soliditylang.org/)
+[![Foundry](https://img.shields.io/badge/Built%20with-Foundry-orange)](https://getfoundry.sh/)
+[![zkSync Era](https://img.shields.io/badge/zkSync%20Era-Sepolia-blueviolet)](https://era.zksync.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-## Features
-- Deadline-based payment release
-- 5% penalty on client delay (cancelByFreelancer)
-- Dispute resolution with neutral arbiter
-- Auto-resolve if arbiter times out
-- Pull-payment fallback for failed transfers
-- 2-of-2 deadline extension approval
+**An advanced, production‑ready smart contract for trustless freelance payments on zkSync Era.**  
+Designed for cross‑border freelancing, this escrow system includes deadline enforcement, penalty fees, dispute resolution with arbiter, auto‑timeout, deadline extensions, and a pull‑payment fallback.
 
-## Tech Stack
-Solidity ^0.8.18 | Foundry | Sepolia Testnet
+---
 
-## Security Patterns Applied
-- Checks-Effects-Interactions (CEI)
-- Reentrancy protection
-- Pull-payment fallback (FIX F)## Foundry
+## ✨ Features
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+- ✅ **Secure Escrow** – Funds are locked until release or dispute resolution.
+- ⏰ **Deadline & Grace Period** – Freelancer can cancel after `deadline + 1 day` and receives a 5% penalty from the locked amount.
+- ⚖️ **Dispute Resolution** – Any party can raise a dispute within a 3‑day window after the deadline. A neutral arbiter resolves in favour of client or freelancer.
+- ⏱️ **Arbiter Timeout** – If the arbiter does not act within 7 days, the dispute auto‑resolves against the party who raised it (discourages frivolous disputes).
+- 📅 **Deadline Extension** – Both client and freelancer must approve any extension (2‑of‑2 signature pattern).
+- 💸 **Pull‑Payment Fallback** – If a direct ETH transfer fails (e.g., recipient contract rejects payment), funds are queued for manual withdrawal.
+- 🧪 **Fully Tested** – 30+ unit tests and fuzz tests using Foundry. All critical paths covered.
+- 🔐 **Security First** – Follows Checks‑Effects‑Interactions pattern, reentrancy‑safe, no risky assembly or delegatecall.
 
-Foundry consists of:
+---
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## 🛠️ Tech Stack
 
-## Documentation
+- **Smart Contract** – Solidity `^0.8.18`
+- **Framework** – Foundry (forge, cast, anvil)
+- **zkSync Era** – Native compilation (`--zksync`) and deployment
+- **Testing** – Forge standard library + fuzzing
+- **Verification** – zkSync block explorer (auto‑verify during deployment)
 
-https://book.getfoundry.sh/
+---
 
-## Usage
+## 📦 Contract Address (zkSync Era Sepolia)
 
-### Build
+> **Deployed & Verified**  
+> [`0x8f9f105e570AF8B56c3766831982605aD718685d`](https://sepolia.explorer.zksync.io/address/0x8f9f105e570AF8B56c3766831982605aD718685d)
 
-```shell
-$ forge build
-```
+Use the link above to inspect the source code, read/write functions, and transaction history.
 
-### Test
+---
 
-```shell
-$ forge test
-```
+## 🚀 Getting Started
 
-### Format
+### Prerequisites
 
-```shell
-$ forge fmt
-```
+- [Foundry](https://getfoundry.sh/) (for standard EVM) **or** [Foundry‑ZKsync](https://github.com/matter-labs/foundry-zksync) (for zkSync deployment)
+- Node.js (optional, for frontend integration)
 
-### Gas Snapshots
+### Clone the Repository
 
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+```bash
+git clone https://github.com/Talha-Shamas-dev/Decentralized-Freelance-Escrow-Smart-Contract-with-Dispute-Resolution-Penalties-Auto-Timeout.git
+cd Decentralized-Freelance-Escrow-...
