@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* safety net for wagmi injected SVGs */
+svg {
+  max-width: 100%;
+  max-height: 100%;
+}
