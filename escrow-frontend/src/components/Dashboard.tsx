@@ -278,9 +278,18 @@ export default function Dashboard() {
 
   // Fetch escrows from backend if user logged in
 const fetchBackendEscrows = async () => {
-  // TEMP: skip failing backend call; display empty list
-  setBackendEscrows([]);
-  setLoading(false);
+  if (!user) return;
+  setLoading(true);
+  try {
+    const { data } = await api.get('/escrows/my');
+    setBackendEscrows(data);
+  } catch (err) {
+    console.error(err);
+    toast.error('Failed to load escrows');
+    setBackendEscrows([]);
+  } finally {
+    setLoading(false);
+  }
 };
   // On‑chain fallback: read all escrow IDs from contract
   const { data: nextId, refetch: refetchNextId } = useReadContract({
