@@ -273,7 +273,7 @@ export default function Dashboard() {
   // Detect backend availability
   useEffect(() => {
   // Force backend mode for testing
-  setUseBackend(false);
+  setUseBackend(true);
 }, []);
 
   // Fetch escrows from backend if user logged in
