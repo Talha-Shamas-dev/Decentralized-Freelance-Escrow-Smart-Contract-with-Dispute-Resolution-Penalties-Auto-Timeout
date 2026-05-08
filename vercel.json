@@ -1,5 +1,7 @@
 {
   "buildCommand": "cd escrow-frontend && npm install --legacy-peer-deps && npm run build",
   "outputDirectory": "escrow-frontend/dist",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
