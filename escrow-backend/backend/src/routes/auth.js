@@ -12,20 +12,11 @@ function signAccessToken(user) {
   return jwt.sign(
     { sub: user.id, role: user.role, wallet: user.wallet_address },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
+    { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
   );
 }
 
-function signRefreshToken(user) {
-  return jwt.sign(
-    { sub: user.id, type: 'refresh' },
-    process.env.JWT_REFRESH_SECRET,
-    { expiresIn: '7d' }
-  );
-}
-
-//// POST /auth/wallet-login (wallet + signature)
-// POST /auth/wallet-login (wallet + signature)
+// ── POST /auth/wallet-login (simplified, no refresh token storage) ──
 router.post('/wallet-login', async (req, res) => {
   const { address, signature, message } = req.body;
   if (!address) {
@@ -35,7 +26,7 @@ router.post('/wallet-login', async (req, res) => {
   const walletLower = address.toLowerCase();
 
   try {
-    // Upsert user
+    // Upsert user – create if doesn't exist, else update timestamp
     const { rows } = await pool.query(
       `INSERT INTO users (wallet_address, username)
        VALUES ($1, $2)
@@ -49,20 +40,13 @@ router.post('/wallet-login', async (req, res) => {
       return res.status(403).json({ error: 'Account disabled' });
     }
 
+    // Generate access token
     const accessToken = signAccessToken(user);
-    const refreshToken = signRefreshToken(user);
 
-    // ✅ Use bcrypt.hashSync (imported at top)
-    const tokenHash = bcrypt.hashSync(refreshToken, 8);
-    await pool.query(
-      `INSERT INTO refresh_tokens (user_id, token_hash, expires_at)
-       VALUES ($1, $2, NOW() + INTERVAL '7 days')`,
-      [user.id, tokenHash]
-    );
-
+    // Return a dummy refresh token (frontend expects it, but we don't store it)
     res.json({
       access_token: accessToken,
-      refresh_token: refreshToken,
+      refresh_token: 'dummy',
       user: { id: user.id, wallet_address: user.wallet_address, role: user.role }
     });
   } catch (err) {
@@ -70,3 +54,15 @@ router.post('/wallet-login', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// ── (Optional) POST /auth/refresh – stub for now ──
+router.post('/refresh', async (req, res) => {
+  res.status(501).json({ error: 'Refresh not implemented yet' });
+});
+
+// ── (Optional) POST /auth/logout ──
+router.post('/logout', (req, res) => {
+  res.json({ message: 'Logged out' });
+});
+
+export default router;
