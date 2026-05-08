@@ -2,10 +2,6 @@
 import jwt from 'jsonwebtoken';
 import pool from '../db.js';
 
-/**
- * Verifies JWT from Authorization: Bearer <token>
- * Attaches req.user = { id, wallet_address, role }
- */
 export async function requireAuth(req, res, next) {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) {
@@ -15,7 +11,7 @@ export async function requireAuth(req, res, next) {
   const token = header.slice(7);
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    // Verify user still exists and is active
+    // payload.sub is the user id (set in signAccessToken)
     const { rows } = await pool.query(
       'SELECT id, wallet_address, role, is_active FROM users WHERE id = $1',
       [payload.sub]
@@ -29,14 +25,11 @@ export async function requireAuth(req, res, next) {
     if (err.name === 'TokenExpiredError') {
       return res.status(401).json({ error: 'Token expired' });
     }
+    console.error('[requireAuth]', err);
     return res.status(401).json({ error: 'Invalid token' });
   }
 }
 
-/**
- * Must be used AFTER requireAuth
- * Rejects non-admin users
- */
 export function requireAdmin(req, res, next) {
   if (req.user?.role !== 'admin') {
     return res.status(403).json({ error: 'Admin access required' });

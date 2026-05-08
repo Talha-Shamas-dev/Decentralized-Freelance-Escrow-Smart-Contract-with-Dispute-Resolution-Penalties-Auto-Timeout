@@ -5,9 +5,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
-import authRoutes   from './routes/auth.js';
+import authRoutes from './routes/auth.js';
 import escrowRoutes from './routes/escrows.js';
-import adminRoutes  from './routes/admin.js';
+import adminRoutes from './routes/admin.js';
 
 // ── Validate required env vars ──────────────────────────────
 const REQUIRED_ENV = ['DATABASE_URL', 'JWT_SECRET', 'JWT_REFRESH_SECRET', 'PORT'];
@@ -18,24 +18,35 @@ for (const key of REQUIRED_ENV) {
   }
 }
 
-const app  = express();
+const app = express();
 const PORT = process.env.PORT || 4000;
 
 // ── Global Middleware ───────────────────────────────────────
-app.use(helmet());
+// CORS must be first
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://127.0.0.1:5178',
-    'http://localhost:5178'
-  ],
+  origin: true,
   credentials: true,
 }));
+
+// Explicit OPTIONS handler for all routes (ensures preflight works)
+app.options('*', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
+
+// Helmet – relaxed CORS policies
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+}));
+
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: false }));
 
-// Rate limiting: 100 requests per 15 minutes per IP
+// Rate limiting
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -44,7 +55,6 @@ app.use(rateLimit({
   message: { error: 'Too many requests — slow down' },
 }));
 
-// Stricter limit on auth endpoints
 app.use('/auth', rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
@@ -52,9 +62,9 @@ app.use('/auth', rateLimit({
 }));
 
 // ── Routes ──────────────────────────────────────────────────
-app.use('/auth',   authRoutes);
+app.use('/auth', authRoutes);
 app.use('/escrows', escrowRoutes);
-app.use('/admin',  adminRoutes);
+app.use('/admin', adminRoutes);
 
 // ── Health check ────────────────────────────────────────────
 app.get('/health', (req, res) => {

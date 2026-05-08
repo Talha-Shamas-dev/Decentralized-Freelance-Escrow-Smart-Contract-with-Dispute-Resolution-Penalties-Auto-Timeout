@@ -1,13 +1,11 @@
-// src/db.js — PostgreSQL connection pool
+// src/db.js
 import pg from 'pg';
 const { Pool } = pg;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production'
-    ? { rejectUnauthorized: true }
-    : false,
-  max: 20,                // max connections in pool
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : false,
+  max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 });
