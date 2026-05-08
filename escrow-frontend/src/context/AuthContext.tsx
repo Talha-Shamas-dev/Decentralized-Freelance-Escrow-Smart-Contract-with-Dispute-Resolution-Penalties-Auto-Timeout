@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const signature = await signMessageAsync({ message });
       const { data } = await api.post('/auth/wallet-login', { address, signature, message });
       localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('refresh_token', data.refresh_token);
+      if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
       setUser(data.user);
     } catch (err: any) {
       console.error('Login failed', err);
