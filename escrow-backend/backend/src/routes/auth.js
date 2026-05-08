@@ -25,6 +25,7 @@ function signRefreshToken(user) {
 }
 
 //// POST /auth/wallet-login (wallet + signature)
+// POST /auth/wallet-login (wallet + signature)
 router.post('/wallet-login', async (req, res) => {
   const { address, signature, message } = req.body;
   if (!address) {
@@ -34,7 +35,7 @@ router.post('/wallet-login', async (req, res) => {
   const walletLower = address.toLowerCase();
 
   try {
-    // Upsert user (create if not exists, else update timestamp)
+    // Upsert user
     const { rows } = await pool.query(
       `INSERT INTO users (wallet_address, username)
        VALUES ($1, $2)
@@ -48,20 +49,11 @@ router.post('/wallet-login', async (req, res) => {
       return res.status(403).json({ error: 'Account disabled' });
     }
 
-    // Generate JWT tokens
-    const accessToken = jwt.sign(
-      { sub: user.id, role: user.role, wallet: user.wallet_address },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
-    );
-    const refreshToken = jwt.sign(
-      { sub: user.id, type: 'refresh' },
-      process.env.JWT_REFRESH_SECRET,
-      { expiresIn: '7d' }
-    );
+    const accessToken = signAccessToken(user);
+    const refreshToken = signRefreshToken(user);
 
-    // Store refresh token hash (simplified; in production use bcrypt)
-    const tokenHash = require('bcryptjs').hashSync(refreshToken, 8);
+    // ✅ Use bcrypt.hashSync (imported at top)
+    const tokenHash = bcrypt.hashSync(refreshToken, 8);
     await pool.query(
       `INSERT INTO refresh_tokens (user_id, token_hash, expires_at)
        VALUES ($1, $2, NOW() + INTERVAL '7 days')`,
