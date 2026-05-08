@@ -1,22 +1,19 @@
-// src/routes/auth.js
+// src/routes/auth.js – minimal, reliable wallet-login
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { z } from 'zod';
 import pool from '../db.js';
 
 const router = Router();
 
-// ── Token helpers ───────────────────────────────────────────
 function signAccessToken(user) {
   return jwt.sign(
     { sub: user.id, role: user.role, wallet: user.wallet_address },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+    { expiresIn: '1h' }
   );
 }
 
-// ── POST /auth/wallet-login (simplified, no refresh token storage) ──
 router.post('/wallet-login', async (req, res) => {
   const { address, signature, message } = req.body;
   if (!address) {
@@ -26,7 +23,7 @@ router.post('/wallet-login', async (req, res) => {
   const walletLower = address.toLowerCase();
 
   try {
-    // Upsert user – create if doesn't exist, else update timestamp
+    // Upsert user – create if not exists, else update timestamp
     const { rows } = await pool.query(
       `INSERT INTO users (wallet_address, username)
        VALUES ($1, $2)
@@ -40,10 +37,9 @@ router.post('/wallet-login', async (req, res) => {
       return res.status(403).json({ error: 'Account disabled' });
     }
 
-    // Generate access token
     const accessToken = signAccessToken(user);
 
-    // Return a dummy refresh token (frontend expects it, but we don't store it)
+    // Frontend expects a refresh_token – we return a dummy value
     res.json({
       access_token: accessToken,
       refresh_token: 'dummy',
@@ -55,12 +51,10 @@ router.post('/wallet-login', async (req, res) => {
   }
 });
 
-// ── (Optional) POST /auth/refresh – stub for now ──
-router.post('/refresh', async (req, res) => {
+router.post('/refresh', (req, res) => {
   res.status(501).json({ error: 'Refresh not implemented yet' });
 });
 
-// ── (Optional) POST /auth/logout ──
 router.post('/logout', (req, res) => {
   res.json({ message: 'Logged out' });
 });
